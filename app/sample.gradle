@@ -1,1 +1,29 @@
-println "sample.gradle start"
+println 'sample.gradle start gradle 相关示例 ===========================================> \n'
+
+
+task CheckImage() {
+    println 'task testCheck() 执行检测项目中所有图片的前缀'
+    def before = System.currentTimeMillis()
+    def isValue = true
+    def count = 0
+    fileTree(rootDir) { FileTree fileTree ->
+        fileTree.visit { FileTreeElement element ->
+            def pathName = element.file.name
+            if (pathName.endsWith("png") || pathName.endsWith("jpg") || pathName.endsWith("jpeg")) {
+                if (!element.name.startsWith("bdg")) {
+                    if (count == 2) {
+                        return
+                    }
+                    count = count + 1
+                    println '当前图片前缀不是bdg ， ：' + element.file.name
+                    isValue = false
+                }
+            }
+        }
+    }
+//    if (!isValue) {
+//        throw new GradleException('检测不通过')
+//    }
+    def after = System.currentTimeMillis() - before
+    println 'task testCheck() 检测耗时 ：' + after + "\n"
+}
