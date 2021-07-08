@@ -14,11 +14,10 @@ Gradle插件本地路径设置-https://www.jianshu.com/p/cff4684803f3
 
 ![img_gradle_generate](imgsource/img_gradle_generate.png)  
 
-1、在对应插件目录的build.gradle文件下，指定插件的生成目录。
-2、生成Gradle插件
-方式一：
-点击Gradle -> Tasks -> upload -> uploadArchives
-
-方式二：
-window终端执行命令行gradlew uploadArchives
-mac终端执行命令行gradlew uploadArchives
+-1、在对应插件目录的build.gradle文件下，指定插件的生成目录。
+-2、生成Gradle插件
+-方式一：
+-点击Gradle -> Tasks -> upload -> uploadArchives
+-方式二：
+-window终端执行命令行gradlew uploadArchives
+-mac终端执行命令行gradlew uploadArchives
