@@ -3,8 +3,8 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply from: './test.gradle'
 apply from: './sample.gradle'
-if (is_apply_my_plugin){
-    apply plugin: 'com.example.myplugin'
+if (is_apply_my_plugin) {
+    apply from: './myPluginConfig.gradle'
 }
 
 android {

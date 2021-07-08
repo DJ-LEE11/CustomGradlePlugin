@@ -1,0 +1,3 @@
+class PluginExtension {
+    String message
+}

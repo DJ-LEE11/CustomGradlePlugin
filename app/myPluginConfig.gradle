@@ -1,0 +1,4 @@
+apply plugin: 'com.example.myplugin'
+pluginExtension{
+    message = 'iam gradle plugin message'
+}

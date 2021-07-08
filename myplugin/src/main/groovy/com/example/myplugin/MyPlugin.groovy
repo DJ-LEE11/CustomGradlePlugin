@@ -12,5 +12,9 @@ class MyPlugin implements Plugin<Project> {
     @Override
     void apply(Project project) {
         println("this is MyPlugin")
+        project.extensions.create('pluginExtension', PluginExtension)
+        project.afterEvaluate {
+            println project.pluginExtension.message
+        }
     }
 }
