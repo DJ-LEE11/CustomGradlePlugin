@@ -27,3 +27,15 @@ task CheckImage() {
     def after = System.currentTimeMillis() - before
     println 'task testCheck() 检测耗时 ：' + after + "\n"
 }
+
+
+tasks.whenTaskAdded { Task task ->
+    if (task.name == "assembleDebug") {
+        task.doFirst {
+            println "hook assembleDebug task before"
+        }
+        task.doLast {
+            println "hook assembleDebug task after"
+        }
+    }
+}
