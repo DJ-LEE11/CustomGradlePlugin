@@ -1,20 +1,26 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
 buildscript {
     ext.kotlin_version = "1.4.21"
+    ext.is_apply_my_plugin = true //是否使用本地自定义插件
     repositories {
         google()
         jcenter()
-//        maven {
-//            url uri('./repos') //指定本地maven的路径，在项目根目录下
-//        }
+        if (is_apply_my_plugin){
+            maven {
+                url uri('./repos') //指定本地maven的路径，在项目根目录下
+            }
 //        maven {
 //            url 'E://repository' //指定本地maven的路径，比如在Window系统E盘的E:\repository文件夹下
 //        }
+        }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.0.0"
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
-//        classpath 'com.example.myplugin:myplugin:1.0.0'
+        if (is_apply_my_plugin){
+            classpath 'com.example.myplugin:myplugin:1.0.0'
+        }
     }
 }
 
