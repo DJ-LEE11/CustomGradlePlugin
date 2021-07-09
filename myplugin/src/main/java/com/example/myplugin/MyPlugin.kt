@@ -28,9 +28,12 @@ class MyPlugin : Plugin<Project> {
 
         hookTask(project)
 
-        project.delete {
-            it.delete("./README.md")
+        project.afterEvaluate {
+            project.tasks.register("MyTask", MyPluginTask::class.java) {
+
+            }
         }
+
     }
 
     /**
