@@ -1,0 +1,21 @@
+project.afterEvaluate {
+    project.android.applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            output.processResources.doFirst { pm->
+                String manifestPath = output.processResources.manifestFile
+                def manifestContent = file(manifestPath).getText()
+                println("permission_filter权限过滤 manifestPath = $manifestPath, manifestContent = $manifestContent")
+                manifestContent = manifestContent.replace(
+                        '<uses-permission android:name="android.permission.CAMERA" />', ''
+                )
+                manifestContent = manifestContent.replace(
+                        '<uses-permission android:name="android.permission.READ_OWNER_DATA" />', ''
+                )
+                manifestContent = manifestContent.replace(
+                        '<uses-permission android:name="android.permission.READ_CONTACTS" />', ''
+                )
+                file(manifestPath).write(manifestContent)
+            }
+        }
+    }
+}
