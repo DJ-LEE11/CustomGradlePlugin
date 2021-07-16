@@ -1,3 +1,38 @@
 include ':myplugin'
 include ':app'
 rootProject.name = "CustomGradlePlugin"
+
+
+gradle.addBuildListener(new BuildListener() {
+
+    @Override
+    void buildStarted(Gradle gradle) {
+        println 'settings buildStarted【开始构建】'
+    }
+
+    @Override
+    void beforeSettings(Settings settings) {
+        super.beforeSettings(settings)
+        println 'settings beforeSettings settings.gradle 解析前'
+    }
+
+    @Override
+    void settingsEvaluated(Settings settings) {
+        println 'settings settingsEvaluated settings.gradle 解析完成'
+    }
+
+    @Override
+    void projectsLoaded(Gradle gradle) {
+        println 'settings projectsLoaded 初始化阶段结束'
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+        println 'settings projectsEvaluated 配置阶段结束'
+    }
+
+    @Override
+    void buildFinished(BuildResult result) {
+        println 'settings buildFinished 构建过程结束'
+    }
+})
