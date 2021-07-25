@@ -1,0 +1,358 @@
+4-2节-Groovy变量
+def定义弱类型变量
+
+4-3节-Groovy字符串
+单引号’String‘
+双引号"String"，这种方式可以通过${}扩展
+三引号'''String'''
+
+4-5节-逻辑控制
+范围定义：def range = 1..9
+集合定义：def list = [1,2,3,4,5]
+Map定义：def map = [1:"one", 2:"two"]
+
+循环遍历
+for(i in map){
+}
+
+4-6节-闭包基础
+闭包简单定义：def closer = {println 'groovy'}
+闭包调用执行：closer.call() 或 closer()
+
+闭包参数定义：def closer = {str1,str2 -> println str1 + str2}
+closer('groovy','hello')
+
+每个闭包都包含一个默认隐藏参数it：def closer = {print "hello ${it}"}
+closer('groovy')
+
+闭包一定有返回值，是最后一行的值，比如
+def closer = {println 'groovy'}，closer的值为null
+
+4-8节-闭包中String使用
+def str = "String 1 Groovy"
+String的遍历
+str.each{
+    println it
+}
+
+String中查找符号条件的字符
+println str.find {
+    it.isNumber()
+}
+打印结果为1
+
+4-9节-闭包进阶
+闭包的三个重要变量
+this：代表闭包定义处的类。
+owner：代表闭包定义处最近的类。
+delegate：不特别指定的话，和owner一致。
+大多数情况下，这三个变量所指向的是同一个对象，
+当闭包嵌套闭包时，会不一样。
+Class Test{}
+def test = new Test()
+def ACloser = {
+       def BCloser = {
+           println this
+           println owner
+           println delegate
+       }
+       BCloser.delegate = test
+       BCloser()
+}
+ACloser()
+以上这种情况下，this代表ACloser，owner代表BCloser，delegate代表Test。
+
+4-10节-列表创建
+list集合创建
+def list = [] //空集合
+def list = [1,2,3,4]
+
+数组创建
+def array = [1,2,3,4] as int[]
+int[] array = [1,2,3,4]
+
+4-11节-列表操作
+def list = [3,2,1,4]
+列表添加
+list.add(i)
+list << i
+列表排序
+list.sort {def item1 , def item2 ->
+    return item1>item2
+}
+列表查找
+list.find{
+  return Boolean
+}
+
+4-12节-映射map
+map定义
+def map = ['a':1 , 'b':2]
+获取value
+map['a']、map.a
+添加元素
+map.c = 3
+
+4-13节-映射map操作
+map遍历
+map.each{
+    println it.key + it.value
+}
+map索引遍历
+map.eachWithIndex{ def entry , int index->
+    println entry.key + entry.value
+}
+map查找
+map.find {
+    return Boolean
+}
+map分组
+map.groupBy {
+    return Boolean
+}
+map排序
+map.sort { def entry1 ,def entry2 ->
+   return entry1.value > entry2.value
+}
+
+4-14节-范围
+def range = 1..10
+获取某个值
+range[0]
+
+4-15节-面向对象
+class People{
+    int age
+}
+对象的创建
+def p = People(age:10)
+为一个类动态添加一个属性
+People.metaClass.name = 'Tony'
+println new People().name
+为一个类动态添加方法
+People.metaClass.getFun = { def var->
+    println var
+}
+new People().getFun('groovy')
+
+5-2节-json操作
+将实体对象转换成Json字符串
+def jsonStr = JsonOutput.toJson(Object)
+格式化处理
+JsonOutput.prettyPrint(jsonStr)
+将json字符串转换成对象
+def object = new JsonSlurper().parse()
+
+//从网络下载json文件并解析
+def getNetworkData(String url){
+    //发送http请求
+    def connection = new URL(url).openConnection()
+    connection.connect()
+    def response = connection.content.text
+    return new JsonSlurper().parseText(response)
+}
+
+5-3节-xml文件处理
+解析一个xml文件
+def xmlSlurper = new XmlSlurper().parse(file)
+
+5-5节-文件处理
+def file = new File(path)
+文件内容遍历
+file.eachLine { line ->
+    println line
+}
+获取文件内容
+println file.getText()
+获取文件每一行的内容并返回list
+def fileList = file.readLines()
+
+//拷贝文件
+def copy(String sourcePath, String destinationPath) {
+    try {
+        //检查源文件是否存在
+        def sourceFile = new File(sourcePath)
+        if (!sourceFile.exists()) {
+            return false
+        }
+        //创建目标文件
+        def destinationFile = new File(destinationPath)
+        if (!destinationFile.exists()) {
+            destinationFile.createNewFile()
+        }
+        //开始copy，首先先读源文件，然后再写到目标文件中
+        sourceFile.withReader { reader ->
+            def lines = reader.readLines()
+            destinationFile.withWriter {writer ->
+                lines.each {
+                    writer.append(it + "\r\n")
+                }
+            }
+        }
+    } catch (Exception e) {
+        println e.printStackTrace()
+        return false
+    }
+    return true
+}
+
+println copy("./app/src/main/AndroidManifest.xml",
+        "./app/src/main/AndroidManifest2.xml")
+
+5-6节-文件处理
+保存对象到一个文件中
+def saveObject(Object obj, String destinationPath) {
+    try {
+        def destinationFile = new File(destinationPath)
+        if (!destinationFile.exists()) {
+            destinationFile.createNewFile()
+        }
+        destinationFile.withObjectOutputStream {
+            it.writeObject(obj)
+        }
+    } catch (Exception e) {
+        println e.printStackTrace()
+        return false
+    }
+    return true
+}
+
+6-1节-gradle
+gradle是构建编程框架
+
+6-3节-gradle生命周期间监听
+//当前project配置阶段开始前的回调监听
+this.beforeEvaluate {
+}
+
+//当前project配置阶段完成以后的回调监听
+this.afterEvaluate {
+}
+
+/project执行前的回调，如果在根build.gradle使用，所有子build.gradle都能监听
+this.gradle.beforeProject {
+}
+
+//project执行后的回调，如果在根build.gradle使用，所有子build.gradle都能监听
+this.gradle.afterProject {
+}
+
+//gradle执行完毕后的回调
+this.gradle.buildFinished {
+}
+
+7-1节-project
+project的标志是build.gradle文件
+
+7-2节-project api
+获取所有的project
+project.getAllProjects()
+获取所有子project
+project.getSubProjects()
+获取父project
+project.getParentProjects()
+获取根project
+project.getRootProjects()
+
+
+
+
+
+
+
+
+5-1节-
+5-1节-
+5-1节-
+5-1节-
+5-1节-
+5-1节-
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
