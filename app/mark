@@ -244,7 +244,7 @@ this.gradle.buildFinished {
 7-1节-project
 project的标志是build.gradle文件
 
-7-2节-project api
+7-3节-project api
 获取所有的project
 project.getAllProjects()
 获取所有子project
@@ -254,19 +254,221 @@ project.getParentProjects()
 获取根project
 project.getRootProjects()
 
+7-4节-project api
+父project可以直接获取操作子app project
+project('app'){ Project project ->
+    apply plugin: 'com.android.application'
+    android{
+    }
+    dependencies{
+    }
+    println project.name
+}
 
+当前和所有子Project统一配置
+allProjects{
+}
 
+所有子Project统一配置
+subProjects{Project project ->
+    if(project.plugins.hasPlugin('com.android.library')){
+        apply from: '......'
+    }
+}
 
+7-5节-project扩展属性一
+根project定义扩展属性
+ext{
+    groovyVersion = 25
+    android = [
+        javaVersion : 1.0
+    ]
+}
 
+根project调用某个扩展属性
+this.ext.android['javaVersion']
 
+子project调用父project的某个扩展属性
+this.ext.android['javaVersion']或rootProject.ext.android['javaVersion']
+注意，父project的扩展属性会被子project继承，所以子project也能直接使用。
 
+7-6节-project扩展属性二
+gradle.properties文件只支持key-value扩展属性
 
-5-1节-
-5-1节-
-5-1节-
-5-1节-
-5-1节-
-5-1节-
+7-7节-文件路径api
+获取根工程文件路径
+println getRootDir().absolutePath
+获取当前工程build文件路径
+println getBuildDir().absolutePath
+获取当前工程文件路径
+println getProjectDir().absolutePath
+
+获取相对于当前project中的某一个文件
+def getFileContent(String path) {
+    try {
+        def file = file(path)
+        println file.text
+    } catch(GradleException e) {
+        println '文件找不到'
+    }
+}
+getFileContent('build.gradle')
+
+文件拷贝
+将app目录下的apk文件夹包拷贝到根目录的build包下
+copy{
+    from file('build/outputs/apk/')
+    into getRootProject().getBuildDir().path +'/apk/'
+    //可以进行文件过滤
+    exclude{}
+    //可以进行文件重命名
+    rename{}
+}
+
+对文件树进行遍历
+fileTree('build/kotlin/') { FileTree fileTree ->
+    fileTree.visit { FileTreeElement element ->
+        println element.path
+        //拷贝到跟工程的test文件中
+        copy {
+            from element.file
+            into getRootProject().getBuildDir().path+'/test/'
+        }
+    }
+}
+
+7-8节-依赖操作api
+//gradle配置阶段用到的插件配置
+buildscript {
+    //配置工程的仓库地址
+    repositories {
+        jcenter()
+        mavenCentral()
+        //私有仓库配置
+        maven {
+            name 'pluginName'
+            url 'https://plugins.gradle/'
+        }
+    }
+    //配置工程的插件依赖地址
+    dependencies {
+        classpath 'com.android.gradle:1.0'
+    }
+}
+
+//project闭包中的dependencies则是为程序添加第三方库依赖
+dependencies {
+    //依赖方式一，依赖本地的jar包或lib包
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    //依赖方式二，依赖本地的module模块
+    implementation project(':common')
+    //依赖方式三、依赖远程第三方库
+    implementation "androidx.room:room-ktx:2.0.0"
+    //依赖冲突处理
+    implementation "androidx.room:room-rxjava2:2.0.0" {
+        exclude xxxxx
+    }
+}
+
+7-9节-外部命令
+//将生成的apk包移动到桌面
+task(name: 'apkCopy') {
+    doLast {
+        def sourcePath = this.buildDir.path + '/outputs/apk'
+        def destinationPath = '桌面地址url'
+        //这个是系统移动文件的命令
+        def command = "mv -f ${sourcePath} ${destinationPath}"
+        //下面这个执行命令的闭包是固定写法
+        exec {
+            try {
+                executable 'bash'
+                args '-c', command
+            } catch (GradleException e) {
+                e.printStackTrace()
+            }
+        }
+    }
+}
+
+最后在控制台通过命令执行任务即可
+gradlew apkCopy
+
+8-2节-Task定义
+//task创建一
+task testTask(group: 'test' , description: 'this is tastTask'){
+    println 'testTask'
+}
+//task创建二
+this.tasks.create(name:'testTask'){
+    //配置
+    setGroup('test')
+    setDescription('this is testTask')
+}
+
+8-3节-task执行
+//只有task能在执行阶段执行，通过doFirst、doLast实现
+//统计build执行阶段的耗时
+def startBuildTime, endBuildTime
+this.afterEvaluate { Project project ->
+    //找到在build执行最开始的task
+    def preBuildTask = project.tasks.getByName('preBuild')
+    preBuildTask.doFirst {
+        startBuildTime  = System.currentTimeMillis()
+        println 'the start time is '+startBuildTime
+    }
+    //build执行最后的task
+    def buildTask = project.tasks.getByName('build')
+    buildTask.doLast {
+        endBuildTime = System.currentTimeMillis()
+        println "the build time is ${endBuildTime - startBuildTime}"
+    }
+}
+//最后执行命令 gradlew build
+
+8-5节-task执行顺序
+task task1 {
+    //注意这条打印语句只会出现在配置阶段，不会在执行阶段执行
+    println('task1')
+    doFirst {
+        println('task1 doFirst')
+    }
+}
+
+task task2 {
+    doFirst {
+        println('task2 doFirst')
+    }
+}
+
+//执行task3之前会先执行所依赖的task1和task2，这种情况下task1和task2的顺序是随机的
+task task3(dependsOn: [task1, task2]) {
+    doFirst {
+        println('task3 doFirst')
+    }
+}
+
+task task4{
+    //依赖当前project中所有lib开头的task
+    dependsOn this.tasks.findAll {task->
+        return task.name.startsWith("lib")
+    }
+    doFirst {
+        println('task4 doFirst')
+    }
+}
+
+task lib1 {
+
+    doFirst {
+        println('lib1 doFirst')
+    }
+}
+
+task lib2{
+    doFirst {
+        println('lib2')
+    }
+}
 
 
 
