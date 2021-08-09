@@ -28,14 +28,51 @@ task CheckImage() {
     println 'task testCheck() 检测耗时 ：' + after + "\n"
 }
 
-
-tasks.whenTaskAdded { Task task ->
+//Hook执行阶段的所有任务，这个监听只能放在build.gradle中
+tasks.whenTaskAdded { org.gradle.api.Task task ->
+    //当前build.gradle脚本解析结束后会打印所有的task
+//    println("whenTaskAdded 11111 ${task.name}")
     if (task.name == "assembleDebug") {
         task.doFirst {
-            println "hook assembleDebug task before"
+            println " whenTaskAdded hook assembleDebug task before"
         }
         task.doLast {
-            println "hook assembleDebug task after"
+            println "whenTaskAdded hook assembleDebug task after"
         }
     }
 }
+
+task hookTask() {
+    doLast {
+        println 'hook某一个task'
+    }
+}
+
+afterEvaluate {
+    //hookTask任务的执行时机在generateDebugAssets和assembleDebug之间
+    hookTask.dependsOn generateDebugAssets
+    assembleDebug.dependsOn hookTask
+}
+
+this.afterEvaluate {project ->
+    def preBuildTask = project.tasks.getByName("preBuild")
+    preBuildTask.doFirst {
+        println("afterEvaluate hook ${it.name}")
+    }
+}
+
+//Hook变体的task
+this.afterEvaluate {
+    this.android.applicationVariants.all {variant ->
+        println "applicationVariants name = ${variant.name} , baseName: ${variant.baseName}"
+        def task = variant.checkManifest
+        println "applicationVariants taskName = ${task.name}"
+        task.doFirst {
+            println "applicationVariants doFirst taskName = ${task.name}"
+        }
+    }
+}
+
+
+
+

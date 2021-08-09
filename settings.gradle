@@ -2,37 +2,92 @@ include ':myplugin'
 include ':app'
 rootProject.name = "CustomGradlePlugin"
 
+//Setting脚本执行前调用
+gradle.beforeSettings {
+    //注意写在这里不会回调，因为这里settings.gradle已经执行了
+    println("settings gradle.beforeSettings settings.gradle 解析前回调")
+}
 
-gradle.addBuildListener(new BuildListener() {
+//Setting脚本执行完成后调用
+gradle.settingsEvaluated {
+    println("settings gradle.settingsEvaluated settings.gradle 解析完成回调")
+}
 
+//初始化阶段结束调用
+gradle.projectsLoaded {
+    println("settings gradle.projectsLoaded 初始化阶段结束回调")
+}
+
+//每个project项目编译前调用
+gradle.beforeProject {
+    println("settings gradle.beforeProject 每个项目执行前回调")
+}
+
+//每个project项目编译完成后调用
+gradle.afterProject {
+    println("settings gradle.afterProject 每个项目执行结束回调")
+}
+
+//对所有项目脚本进行监听
+gradle.allprojects(new Action<Project>() {
     @Override
-    void buildStarted(Gradle gradle) {
-        println 'settings buildStarted【开始构建】'
-    }
-
-    @Override
-    void beforeSettings(Settings settings) {
-        super.beforeSettings(settings)
-        println 'settings beforeSettings settings.gradle 解析前'
-    }
-
-    @Override
-    void settingsEvaluated(Settings settings) {
-        println 'settings settingsEvaluated settings.gradle 解析完成'
-    }
-
-    @Override
-    void projectsLoaded(Gradle gradle) {
-        println 'settings projectsLoaded 初始化阶段结束'
-    }
-
-    @Override
-    void projectsEvaluated(Gradle gradle) {
-        println 'settings projectsEvaluated 配置阶段结束'
-    }
-
-    @Override
-    void buildFinished(BuildResult result) {
-        println 'settings buildFinished 构建过程结束'
+    void execute(Project project) {
+        project.beforeEvaluate {
+            println("settings gradle.allprojects.beforeEvaluate build.gradle解析前回调")
+        }
+        project.afterEvaluate {
+            println("settings gradle.allprojects.afterEvaluate build.gradle解析结束回调")
+        }
     }
 })
+
+//配置阶段结束调用
+gradle.projectsEvaluated {
+    println("settings gradle.projectsEvaluated 配置阶段结束回调")
+}
+
+// 编译阶段 Task 流程图计算出来后调用
+gradle.taskGraph.whenReady {
+    println("settings gradle.taskGraph.whenReady task有向无环图生成回调")
+}
+
+//构建结束时调用
+gradle.buildFinished {
+    println("settings gradle.buildFinished 构建过程结束回调")
+}
+
+//Hook执行阶段的所有任务，这个监听既可以放在setting.gradle文件中，又可以放在build.gradle中
+gradle.addListener(new TaskExecutionGraphListener() {
+    @Override
+    void graphPopulated(TaskExecutionGraph taskExecutionGraph) {
+        taskExecutionGraph.getAllTasks().each {
+            //配置阶段结束后，到有向无环图生成前，会打印所有的task
+            println("graphPopulated 11111 ${it.name}")
+            it.doFirst {
+                //执行阶段会在该任务执行前调用
+                println("graphPopulated doFirst ${it.name}")
+            }
+
+            it.doLast {
+                println("graphPopulated doLast ${it.name}")
+            }
+            //hook执行阶段的某一个任务
+            if (it.name == "generateDebugBuildConfig"){
+                it.doFirst {
+                    println("graphPopulated hook ${it.name}")
+                }
+            }
+        }
+    }
+})
+
+
+
+
+
+
+
+
+
+
+

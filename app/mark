@@ -9,7 +9,7 @@ def定义弱类型变量
 4-5节-逻辑控制
 范围定义：def range = 1..9
 集合定义：def list = [1,2,3,4,5]
-Map定义：def map = [1:"one", 2:"two"]
+Map定义：def map = ['1':"one", '2':"two"]
 
 循环遍历
 for(i in map){
@@ -86,7 +86,7 @@ list.find{
 }
 
 4-12节-映射map
-map定义
+map定义，注意key必须是字符串
 def map = ['a':1 , 'b':2]
 获取value
 map['a']、map.a
@@ -395,7 +395,7 @@ gradlew apkCopy
 
 8-2节-Task定义
 //task创建一
-task testTask(group: 'test' , description: 'this is tastTask'){
+task testTask(group: 'test' , description: 'this is testTask'){
     println 'testTask'
 }
 //task创建二
@@ -469,3 +469,186 @@ task lib2{
         println('lib2')
     }
 }
+
+//设置task执行的优先级(A在B后执行)
+A.dependsOn B -->   执行A的时候先执行B (还没声明出来的 task 要加 "")
+A.mustRunAfter B  -->   同时执行 A/B，先执行B在执行A，若执行关系不成立报错
+A.shouldRunAfter B  -->   同 mustRunAfter，但是执行关系不成立不会报错
+
+
+//系统默认Task,比如 copy、delete
+task speak (type: Copy) {
+    ...
+}
+或者
+Copy{
+}
+
+参与项目构建的第三方代码叫 --> 插件
+参与代码逻辑的第三方代码叫 --> 依赖
+
+Gradle构建分的三个阶段
+Initialization  --> 初始化阶段。按顺序执行 init.gradle -> settings.gradle 脚本，生成 Gradle、Setting、Project 对象
+Configuration --> 编译阶段，也叫配置阶段。按顺序执行 root build.gradle -> 子项目 build.gradle 脚本，生成 Task 执行流程图
+Execution --> 执行阶段。按照 Task 执行图顺序运行每一个 Task，完成一个个步奏，生成最终 APK 文件
+
+
+init.gradle 脚本编译完了会生成 Gradle 对象
+settings.gradle 脚本编译完了会生成 Setting 对象
+build.gradle 脚本编译完了会生成 Project 对象
+
+
+从Hook函数作用的目标角度分类：
+一种专门监听脚本的执行，比如 beforeEvaluated 就是
+一种专门监听项目的执行，比如 beforeProject，gradle.allProject() 可以对所有项目对象进行操作
+一种专门监听 task 的执行，比如 gradle.taskGraph.whenReady()
+
+在setting.gradle脚步可设置的hook回调函数==========》
+gradle.beforeSettings {
+    //注意写在这里不会回调，因为这里settings.gradle已经执行了
+    println("settings gradle.beforeSettings settings.gradle 解析前回调")
+}
+
+gradle.settingsEvaluated {
+    println("settings gradle.settingsEvaluated settings.gradle 解析完成回调")
+}
+
+gradle.projectsLoaded {
+    println("settings gradle.projectsLoaded 初始化阶段结束回调")
+}
+
+gradle.beforeProject {
+    println("settings gradle.beforeProject 每个项目执行前回调")
+}
+
+gradle.afterProject {
+    println("settings gradle.afterProject 每个项目执行结束回调")
+}
+
+//对所有项目脚本进行监听
+gradle.allprojects(new Action<Project>() {
+    @Override
+    void execute(Project project) {
+        project.beforeEvaluate {
+            println("settings gradle.allprojects.beforeEvaluate build.gradle解析前回调")
+        }
+        project.afterEvaluate {
+            println("settings gradle.allprojects.afterEvaluate build.gradle解析结束回调")
+        }
+    }
+})
+
+gradle.projectsEvaluated {
+    println("settings gradle.projectsEvaluated 配置阶段结束回调")
+}
+
+gradle.taskGraph.whenReady {
+    println("settings gradle.taskGraph.whenReady task有向无环图生成回调")
+}
+
+gradle.buildFinished {
+    println("settings gradle.buildFinished 构建过程结束回调")
+}
+
+在子项目build.gradle脚步可设置的hook回调函数==========》
+project.beforeEvaluate {
+    //注意写在这里不会回调，因为这里子build.gradle已经执行了
+    println("project project.beforeEvaluate build.gradle解析前回调")
+}
+
+project.afterEvaluate {
+    println("project project.afterEvaluate build.gradle解析结束后回调")
+}
+
+Listener类型的可设置的hook回调函数==========》
+
+//Hook执行阶段的所有任务，这个监听既可以放在setting.gradle文件中，又可以放在build.gradle中
+gradle.addListener(new TaskExecutionGraphListener() {
+    @Override
+    void graphPopulated(TaskExecutionGraph taskExecutionGraph) {
+        taskExecutionGraph.getAllTasks().each {
+            //配置阶段结束后，到有向无环图生成前，会打印所有的task
+            println("graphPopulated 11111 ${it.name}")
+            it.doFirst {
+                //执行阶段会在该任务执行前调用
+                println("graphPopulated doFirst ${it.name}")
+            }
+
+            it.doLast {
+                println("graphPopulated doLast ${it.name}")
+            }
+            //hook执行阶段的某一个任务
+            if (it.name == "generateDebugBuildConfig"){
+                it.doFirst {
+                    println("graphPopulated hook ${it.name}")
+                }
+            }
+        }
+    }
+})
+
+//Hook执行阶段的所有任务，这个监听不能放在setting.gradle文件中，此时tasks还没生成
+tasks.whenTaskAdded { org.gradle.api.Task task ->
+    //当前build.gradle脚本解析结束后会打印所有的task
+    println("whenTaskAdded 11111 ${task.name}")
+    if (task.name == "assembleDebug") {
+        task.doFirst {
+            println " whenTaskAdded hook assembleDebug task before"
+        }
+        task.doLast {
+            println "whenTaskAdded hook assembleDebug task after"
+        }
+    }
+}
+
+//Hook执行阶段的某一个任务方法一
+task hookTask() {
+    doLast {
+        println 'hook某一个task'
+    }
+}
+
+project.afterEvaluate {
+    //hookTask任务的执行时机在generateDebugAssets和assembleDebug之间
+    hookTask.dependsOn generateDebugAssets
+    assembleDebug.dependsOn hookTask
+}
+
+//hook执行阶段的某一个任务方法二
+this.afterEvaluate {project ->
+    def preBuildTask = project.tasks.getByName("preBuild")
+    preBuildTask.doFirst {
+        println("afterEvaluate hook ${it.name}")
+    }
+}
+
+//Hook变体的task
+this.afterEvaluate {
+    this.android.applicationVariants.all {variant ->
+        println "applicationVariants name = ${variant.name} , baseName: ${variant.baseName}"
+        def task = variant.checkManifest
+        println "applicationVariants taskName = ${task.name}"
+        task.doFirst {
+            println "applicationVariants doFirst taskName = ${task.name}"
+        }
+    }
+}
+
+Gradle编译性能分析相关命令：
+ ./gradlew assembleDebug --profile
+编译完成后，可以在控制台看到生成HTML格式的分析文件的路径
+
+通过buildSrc目录编写的插件开发效率比较高，注意以下四点注意事项
+1、buildSrc目录是gradle默认的构建目录，该目录下的代码会在构建时自动地进行编译打包。
+2、会被添加到buildScript中的classpath下，不需要任何额外的配置就可以直接被其他模块中的gradle脚本引用。
+3、buildSrc的执行时机早于settings.gradle，因此需要在build.gradle中添加仓库
+4、settings.gradle中如果配置了 ':buildSrc'，buildSrc⽬录就会被当做是子Project，会被执行两遍。
+
+Gradle提供的Transform API可以在打包成.dex文件之前对.class文件进行操作(编译插桩)。
+
+编译插桩开发流程
+1、自定义一个Gradle插件，然后创建并注册一个Transform对象。
+2、在Transform对象中重写transform方法。
+3、在transform方法中根据入参遍历项目目录和jar包，从未获取所有的.class文件。
+4、利用ASM框架的Core API去加载并解析的.class文件和相关的方法，最后修改相应的方法。
+
