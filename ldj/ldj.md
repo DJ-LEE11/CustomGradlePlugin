@@ -4,13 +4,16 @@
 
 ![](mobile.png)
 
+
 #### 娱乐开播
 
 ![](game.png)
 
+
 #### 开播架构调整
 
 ![](LivePlatform.png)
+
 
 ![](LivePlatformPro.png)
 
@@ -26,20 +29,24 @@
    
 ![](二-1-1.png)
 
+
 2、弹dialog注意下层级，本页面的弹窗就不要弹到parent上面，使用childFragmentManager。
    [崩溃case](http://bug.yy.com/browse/ANASSI-824)
 
 ![](二-2-1.png)
+
 
 3、异步的findView需要进行判空处理。
    [崩溃case](http://bug.yy.com/browse/ANASSI-837)
    
 ![](二-3-1.png)
 
+
 4、服务器协议字段没有@NonNull需要进行判空处理。
    [崩溃case](http://bug.yy.com/browse/ANASSI-801)
    
 ![](二-4-1.png)
+
 
 5、Smartrefreshlayout控件的混淆问题。
    [崩溃case](http://bug.yy.com/browse/ANASSI-776)
@@ -48,9 +55,11 @@
 
 ![](二-5-2.png)
 
+
 6、view重新加载问题。
 
 ![](二-6-1.png)
+
 
 ### 其他注意事项
 
@@ -59,6 +68,7 @@
    格式：Update: 日期 版本 [需求名](文档链接地址)
    
 ![](二-7-1.png)
+
 
 2、codestyle 不要合并import
 
@@ -80,7 +90,7 @@ bug原因 ：写清楚为什么会出现这个问题
 
 
 
-## 三、其他优化
+###  三、其他优化
 
 1、下拉刷新使用ping
 
