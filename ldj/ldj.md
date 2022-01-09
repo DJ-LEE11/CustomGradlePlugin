@@ -2,12 +2,12 @@
 
 #### 游戏开播
 
-![](mobile.png)
+![](game.png)
 
 
 #### 娱乐开播
 
-![](game.png)
+![](mobile.png)
 
 
 #### 开播架构调整
@@ -21,7 +21,7 @@
 
 ### 二、注意事项
 
-#### 开发注意
+#### 开发注意事项
 
 1、弹dialog使用launchWhenResumed，弹出时机不对可能会导致生命状态异常。
 
@@ -51,8 +51,10 @@
 5、Smartrefreshlayout控件的混淆问题。
    [崩溃case](http://bug.yy.com/browse/ANASSI-776)
 
+修改前：
 ![](二-5-1.png)
 
+修改后：
 ![](二-5-2.png)
 
 
