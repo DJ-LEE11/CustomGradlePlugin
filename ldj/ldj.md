@@ -1,16 +1,14 @@
-# Doc
+### 一、开播流程
 
-## 一、开播流程
-
-### 娱乐开播
+#### 游戏开播
 
 ![](mobile.png)
 
-### 游戏开播
+#### 娱乐开播
 
 ![](game.png)
 
-### 开播架构调整
+#### 开播架构调整
 
 ![](LivePlatform.png)
 
@@ -23,6 +21,7 @@
 #### 开发注意
 
 1、弹dialog使用launchWhenResumed，弹出时机不对可能会导致生命状态异常。
+
    [崩溃case](http://bug.yy.com/browse/ANASSI-588)
    
 ![](二-1-1.png)
