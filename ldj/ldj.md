@@ -80,7 +80,7 @@
 
 
 1、使用Paging分页库实现分页逻辑。
-
+https://www.jianshu.com/p/abbf272b824a
 ![](三-1-1.webp)
 
 2、海度初始化可以用abtest设置一下批量上报，性能更好一点
