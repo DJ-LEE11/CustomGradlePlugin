@@ -43,14 +43,7 @@
 ![](二-3-1.png)
 
 
-4、服务器协议字段没有@NonNull需要进行判空处理。
-   
-   [崩溃case](http://bug.yy.com/browse/ANASSI-801)
-   
-![](二-4-1.png)
-
-
-5、Smartrefreshlayout控件的混淆问题。
+4、Smartrefreshlayout控件的混淆问题。
    
    [崩溃case](http://bug.yy.com/browse/ANASSI-776)
 
@@ -63,7 +56,7 @@
 ![](二-5-2.png)
 
 
-6、view重新加载问题。
+5、view重新加载问题。
 
 ![](二-6-1.png)
 
@@ -72,7 +65,7 @@
 ###  三、其他优化
 
 
-1、使用Paging3分页库实现分页逻辑。
+使用Paging3分页库实现分页逻辑。
 
 
 ![](三-1-1.webp)
@@ -80,4 +73,3 @@
 
 ![](三-1-2.png)
 
-2、海度初始化可以用abtest设置一下批量上报，性能更好一点
