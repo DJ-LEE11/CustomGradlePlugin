@@ -7,6 +7,9 @@ apply from: "./permission_filter.gradle"
 if (is_apply_my_plugin) {
     apply from: './myPluginConfig.gradle'
 }
+if (is_apply_asm_plugin) {
+    apply from: './asmPluginConfig.gradle'
+}
 
 android {
     compileSdkVersion 30

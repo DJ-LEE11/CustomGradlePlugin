@@ -4,7 +4,9 @@ buildscript {
     ext.kotlin_version = "1.4.21"
     ext.Gradle_version = "4.0.0"
     ext.is_apply_my_plugin = false //是否使用本地自定义插件，默认开闭，需要先生成本地插件在开启否则会报错
+    ext.is_apply_asm_plugin = false //是否使用本地asm插件，默认开闭，需要先生成本地插件在开启否则会报错
     repositories {
+        mavenLocal()
         google()
         jcenter()
         if (is_apply_my_plugin){
@@ -21,6 +23,9 @@ buildscript {
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         if (is_apply_my_plugin){
             classpath 'com.example.myplugin:myplugin:1.0.0'
+        }
+        if (is_apply_asm_plugin) {
+            classpath 'com.example.asmplugin:asmplugin:1.0.0'
         }
     }
 }
