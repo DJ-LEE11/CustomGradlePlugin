@@ -48,9 +48,11 @@ class ReportTestTransform : Transform() {
             outputProvider.deleteAll()
             inputs.forEach { input ->
                 input.directoryInputs.forEach {
+                    //对类型为文件夹的input进行遍历
                     handleDirInput(it, outputProvider)
                 }
                 input.jarInputs.forEach { jar ->
+                    //对类型为jar文件的input进行遍历
                     handleJarInput(jar, outputProvider)
                 }
             }
