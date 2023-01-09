@@ -84,7 +84,7 @@ class ReportTestTransform : Transform() {
             dirInput.scopes,
             Format.DIRECTORY
         )
-        // 将input的目录复制到output指定目录
+        // 将修改过的字节码copy到dest路径，这个dest路径就是下一个Transform的输入数据，就可以实现编译期间干预字节码的目的了
         FileUtils.copyDirectory(dirInput.file, dest)
     }
 
